@@ -32,10 +32,10 @@ const amount = computed(() => {
   let amount = Number(props.amount || 0);
 
   if (props.short) {
-    const a = amount / 100;
+    const a = Math.floor(amount / 1000000) || Math.floor(amount / 1000);
     currencySign.value = props.sign || "$";
     sign.value = amount > 1000 ? (amount > 1000000 ? "m" : "k") : "";
-    return `${a.toFixed(0)}`;
+    return `${a.toFixed(0)}${sign.value}`;
   }
 
   return amount.toLocaleString(locale.value, localeOptions.value);
@@ -46,9 +46,9 @@ const convertedAmount = computed(() => {
   let amount = Number(asUsd.value || 0);
 
   if (props.short) {
-    const a = amount / 100;
+    const a = Math.floor(amount / 1000000) || Math.floor(amount / 1000);
     sign.value = amount > 1000 ? (amount > 1000000 ? "m" : "k") : "";
-    return `${a.toFixed(0)}`;
+    return `${a.toFixed(0)}${sign.value}`;
   }
   return amount.toLocaleString(locale.value, localeOptions.value);
 });
