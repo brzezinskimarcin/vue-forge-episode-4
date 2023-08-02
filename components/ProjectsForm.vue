@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { toTypedSchema } from '@vee-validate/zod';
+import { object, string, number, coerce } from 'zod';
+
 const form = ref({
   title: '',
   description: '',
@@ -26,6 +29,24 @@ const shortenDescription = (description: string) => {
   return `${description.slice(0, 130)}${ellipsis}`;
 }
 
+const validationSchema = toTypedSchema(
+  object({
+    title: string()
+      .nonempty("Title is required")
+      .min(10, "Title must be at least 10 characters long"),
+    description: string().nonempty("Description is required"),
+    categoryUuid: string().nonempty("Category is required"),
+    softCap: number()
+      .min(10000, "Soft cap should be a minimum of 10,000")
+      .max(100000, "Soft cap should be a maximum of 100,000"),
+    hardCap: number()
+      .min(10000, "Hard cap should be a minimum of 10,000")
+      .max(100000, "Hard cap should be a maximum of 100,000"),
+    startsAt: coerce.date().min(startOfToday(), "Start date shouldn’t be in the past"),
+    finishesAt: coerce.date().max(getDateXMonthsFromEndOfToday(6), "End date should be no more than 6 months in the future")
+  })
+)
+
 fetchAll();
 
 watch(() => form.value.softCap, (newSoftCap) => {
@@ -49,15 +70,15 @@ watch(() => form.value.hardCap, (newHardCap) => {
     </h1>
     <div class="grid grid-cols-12 gap-8">
       <main class="col-span-8">
-        <form @submit.prevent="submitForm">
+        <Form :validation-schema="validationSchema" @submit="submitForm">
           <ProjectsFormField
             name="title"
             label="What is your project's name?"
             hint="Use a very handy title that people could identify  your project"
           >
-            <input
+            <Field
               v-model="form.title"
-              id="title"
+              name="title"
               class="form-field"
             />
           </ProjectsFormField>
@@ -67,9 +88,10 @@ watch(() => form.value.hardCap, (newHardCap) => {
             label="What is your project about?"
             hint="Describe with full detail your projecty so that people understand exactly what it is about"
           >
-            <textarea
+            <Field
               v-model="form.description"
-              id="description"
+              as="textarea"
+              name="description"
               class="form-field min-h-[300px]"
             />
           </ProjectsFormField>
@@ -81,13 +103,14 @@ watch(() => form.value.hardCap, (newHardCap) => {
           />
 
           <ProjectsFormField
-            name="category"
+            name="categoryUuid"
             label="Which category does your project fit in?"
             hint="Selecting a fitting category ensures the right people find your project"
           >
-            <select
+            <Field
               v-model="form.categoryUuid"
-              id="category"
+              as="select"
+              name="categoryUuid"
               class="form-field select"
             >
               <option
@@ -97,7 +120,7 @@ watch(() => form.value.hardCap, (newHardCap) => {
               >
                 {{ category.name }}
               </option>
-            </select>
+            </Field>
           </ProjectsFormField>
 
           <ProjectsFormField
@@ -106,9 +129,9 @@ watch(() => form.value.hardCap, (newHardCap) => {
             hint="Soft cap is the minimum amount of money that you need to raise in order to start your project"
           >
             <div class="w-full font-semibold">
-              <input
+              <Field
                 v-model.number="form.softCap"
-                id="softCap"
+                name="softCap"
                 type="range"
                 min="0"
                 max="100000"
@@ -125,9 +148,9 @@ watch(() => form.value.hardCap, (newHardCap) => {
             hint="Hard cap is the maximum amount of money that you need to raise in order to start your project"
           >
             <div class="w-full font-semibold">
-              <input
+              <Field
                 v-model.number="form.hardCap"
-                id="hardCap"
+                name="hardCap"
                 type="range"
                 min="0"
                 max="100000"
@@ -139,14 +162,14 @@ watch(() => form.value.hardCap, (newHardCap) => {
           </ProjectsFormField>
 
           <ProjectsFormField
-            name="startAt"
+            name="startsAt"
             label="What is the start date of your project?"
             hint="Start date of your project"
           >
             <div class="w-full font-semibold">
-              <input
+              <Field
                 v-model="form.startAt"
-                id="startAt"
+                name="startsAt"
                 type="date"
                 class="form-field"
               />
@@ -154,23 +177,26 @@ watch(() => form.value.hardCap, (newHardCap) => {
           </ProjectsFormField>
 
           <ProjectsFormField
-            name="endDate"
+            name="finishesAt"
             label="What is the end date of your project?"
             hint="End date of your project"
           >
             <div class="w-full font-semibold">
-              <input
+              <Field
                 v-model="form.finishesAt"
-                id="endDate"
+                name="finishesAt"
                 type="date"
                 class="form-field"
               />
             </div>
           </ProjectsFormField>
+
           <div class="flex justify-end">
-            <button class="btn btn-primary">Publish your project</button>
+            <button class="btn btn-primary">
+              Publish your project
+            </button>
           </div>
-        </form>
+        </Form>
       </main>
       <aside class="col-span-4">
         <ProjectCard

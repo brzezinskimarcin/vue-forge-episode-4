@@ -20,3 +20,12 @@ export function getExactStartTimeFromDateField(startsAt: string) {
       ).toISOString()
     : new Date(startsAt).toISOString();
 }
+
+export function startOfToday() {
+  return new Date(`${new Date().toISOString().slice(0, 10)} 00:00:00`);
+}
+
+export function getDateXMonthsFromEndOfToday(months: number) {
+  const endOfToday = new Date(`${new Date().toISOString().slice(0, 10)} 23:59:59`);
+  return new Date(endOfToday.setMonth(endOfToday.getMonth() + months));
+}

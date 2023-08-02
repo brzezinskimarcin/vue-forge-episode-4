@@ -8,7 +8,12 @@ defineProps<{
 
 <template>
   <div class="mb-4">
-    <label class="text-sm font-semibold" :for="name">{{ label }}</label>
+    <div class="flex justify-between">
+      <label class="text-sm font-semibold" :for="name">
+        {{ label }}
+      </label>
+      <ErrorMessage :name="name" class="text-error" />
+    </div>
     <div class="w-full my-2 min-h-[44px] flex align-stretch">
       <slot></slot>
     </div>
